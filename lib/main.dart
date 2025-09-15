@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:trirecall/core/theme/theme.dart';
 import 'package:trirecall/features/auth/screens/splash_screen.dart';
+import 'package:trirecall/features/auth/screens/login_screen.dart';
 
 Future<void> main() async {
   // Ensure that Flutter bindings are initialized before any async operations.
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
       // This line applies our custom dark theme to the entire app.
       theme: AppTheme.darkThemeMode, 
       // This sets our new SplashScreen as the first screen to be displayed.
-      home: const SplashScreen(),
+      home: const LoginScreen(),
     );
   }
 }
