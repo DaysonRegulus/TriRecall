@@ -25,6 +25,14 @@ class AppTheme {
       elevation: 0, // No shadow for a flatter look.
     ),
 
+    cardTheme: CardThemeData(
+      color: AppPalette.secondaryColor, // Use our secondary color for cards
+      elevation: 2, // Give it a slight shadow
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+
     // Theming for text input fields.
     inputDecorationTheme: InputDecorationTheme(
       contentPadding: const EdgeInsets.all(18),
