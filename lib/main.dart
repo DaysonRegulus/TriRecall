@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/core/theme/theme.dart';
-import 'package:trirecall/features/dashboard/screens/home_screen.dart';
-import 'package:trirecall/core/services/database_helper.dart'; 
+import 'package:trirecall/core/services/database_helper.dart';
+import 'package:trirecall/features/dashboard/screens/nav_hub_screen.dart'; 
 
 Future<void> main() async {
   // Ensure that Flutter's binding is initialized. This is required for async main.
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'TriRecall',
       theme: AppTheme.darkThemeMode,
       // We will temporarily use HomeScreen as our entry point.
-      home: const HomeScreen(),
+      home: const NavHubScreen(),
     );
   }
 }

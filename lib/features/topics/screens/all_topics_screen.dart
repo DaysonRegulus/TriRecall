@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/features/topics/controller/topic_controller.dart';
-import 'package:trirecall/core/services/database_helper.dart';
-import 'package:trirecall/features/review/controller/review_controller.dart';
 
 class AllTopicsScreen extends ConsumerWidget {
   const AllTopicsScreen({super.key});
@@ -51,20 +49,9 @@ class AllTopicsScreen extends ConsumerWidget {
                     'Due: ${topic.nextDue != null ? topic.nextDue!.toLocal().toString().split(' ')[0] : 'Mastered'}',
                     style: const TextStyle(color: Colors.grey),
                   ),
-                  // We'll add an onTap later to view topic details.
-                  onTap: () async {
-                    // --- TEMPORARY TEST LOGIC ---
-                    final yesterday = DateTime.now().subtract(const Duration(days: 1));
-                    final updatedTopic = topic.copyWith(nextDue: yesterday);
-                    await DatabaseHelper.instance.updateTopic(updatedTopic);
-                    
-                    // Invalidate the providers so the HomeScreen updates
-                    ref.invalidate(dueTopicsProvider);
-                    ref.invalidate(allTopicsProvider);
-                    
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${topic.title}" is now due.'))
-                    );
+                  // The onTap is now empty, ready for a future "Topic Details" screen.
+                  onTap: () {
+                    print('Tapped on topic: ${topic.title}');
                   },
                 ),
               );

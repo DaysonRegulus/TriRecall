@@ -18,6 +18,8 @@ class _AddTopicScreenState extends ConsumerState<AddTopicScreen> {
   final notesController = TextEditingController();
   Subject? selectedSubject; // Can be null initially
 
+  DateTime selectedDate = DateTime.now(); // Defaults to today
+
   @override
   void dispose() {
     titleController.dispose();
