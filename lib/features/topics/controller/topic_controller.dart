@@ -22,6 +22,7 @@ class TopicController extends StateNotifier<bool> {
     required int subjectId,
     required String title,
     required String notes,
+    required DateTime studiedOn,
     required WidgetRef ref,
   }) async {
     state = true;
@@ -31,9 +32,10 @@ class TopicController extends StateNotifier<bool> {
       subjectId: subjectId,
       title: title,
       notes: notes,
-      studiedOn: now, // Defaults to today
-      // Topic starts with the first interval, due tomorrow.
-      nextDue: DateTime(now.year, now.month, now.day).add(const Duration(days: 1)),
+      studiedOn: studiedOn,
+      // The due date is always calculated from the 'studiedOn' date.
+      nextDue: DateTime(studiedOn.year, studiedOn.month, studiedOn.day)
+          .add(const Duration(days: 1)),
       lastReviewedAt: now,
       createdAt: now,
     );

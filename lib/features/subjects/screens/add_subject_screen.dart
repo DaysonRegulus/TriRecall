@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trirecall/features/auth/widgets/auth_button.dart'; // We can reuse this!
-import 'package:trirecall/features/auth/widgets/auth_field.dart'; // And this!
+import 'package:trirecall/features/auth/widgets/auth_button.dart';
+import 'package:trirecall/features/auth/widgets/auth_field.dart';
 import 'package:trirecall/features/subjects/controller/subject_controller.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:trirecall/core/utils/color_utils.dart';
 
 // We'll offer a predefined list of colors for simplicity.
 const List<String> subjectColors = [
@@ -24,7 +26,40 @@ class AddSubjectScreen extends ConsumerStatefulWidget {
 
 class _AddSubjectScreenState extends ConsumerState<AddSubjectScreen> {
   final titleController = TextEditingController();
-  String selectedColor = subjectColors[0]; // Default color
+  String selectedColorHex = '#BB86FC'; // Default to our primary purple
+
+  void _showColorPicker() {
+    // Convert our hex string to a Color object for the picker.
+    Color pickerColor = hexToColor(selectedColorHex);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pick a color'),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: pickerColor,
+            onColorChanged: (color) {
+              pickerColor = color;
+            },
+          ),
+        ),
+        actions: <Widget>[
+          ElevatedButton(
+            child: const Text('Got it'),
+            onPressed: () {
+              setState(() {
+                // When the user confirms, update our state.
+                // We convert the Color object back to a hex string for storage.
+                selectedColorHex = '#${pickerColor.value.toRadixString(16).substring(2, 8).toUpperCase()}';
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -36,10 +71,9 @@ class _AddSubjectScreenState extends ConsumerState<AddSubjectScreen> {
     if (titleController.text.trim().isNotEmpty) {
       ref.read(subjectControllerProvider.notifier).createSubject(
             title: titleController.text.trim(),
-            color: selectedColor,
+            color: selectedColorHex, // Use the new state variable
             ref: ref,
           );
-      // Go back to the previous screen after adding.
       Navigator.of(context).pop();
     }
   }
@@ -64,33 +98,30 @@ class _AddSubjectScreenState extends ConsumerState<AddSubjectScreen> {
             const SizedBox(height: 30),
             const Text('Color', style: TextStyle(fontSize: 16)),
             const SizedBox(height: 10),
-            // A grid to display our color choices.
-            Wrap(
-              spacing: 15,
-              runSpacing: 15,
-              children: subjectColors.map((colorHex) {
-                // We parse the hex string to a Color object.
-                final color = Color(int.parse(colorHex.substring(1, 7), radix: 16) + 0xFF000000);
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedColor = colorHex;
-                    });
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: selectedColor == colorHex ? Colors.white : Colors.transparent,
-                        width: 3,
-                      ),
+            Row(
+              children: [
+                // A container to preview the currently selected color.
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: hexToColor(selectedColorHex),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white54, width: 2),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                // A button to launch the color picker dialog.
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _showColorPicker,
+                    child: const Text('Change Color'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
-                );
-              }).toList(),
+                ),
+              ],
             ),
             const Spacer(), // Pushes the button to the bottom
             AuthButton(

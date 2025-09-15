@@ -65,7 +65,9 @@ class HomeScreen extends ConsumerWidget {
                   onPressed: () {
                     ref.read(reviewSessionProvider.notifier).startSession(dueTopics);
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const ReviewScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => ReviewScreen(dueTopics: dueTopics),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),

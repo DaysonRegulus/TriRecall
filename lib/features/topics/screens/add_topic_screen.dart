@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/core/models/subject_model.dart';
 import 'package:trirecall/features/auth/widgets/auth_button.dart';
 import 'package:trirecall/features/auth/widgets/auth_field.dart';
 import 'package:trirecall/features/subjects/controller/subject_controller.dart';
 import 'package:trirecall/features/topics/controller/topic_controller.dart';
+import 'package:trirecall/core/utils/color_utils.dart';
 
 class AddTopicScreen extends ConsumerStatefulWidget {
   const AddTopicScreen({super.key});
@@ -20,6 +22,21 @@ class _AddTopicScreenState extends ConsumerState<AddTopicScreen> {
 
   DateTime selectedDate = DateTime.now(); // Defaults to today
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate, // The picker will open to the currently selected date.
+      firstDate: DateTime(2020), // A reasonable earliest date.
+      lastDate: DateTime.now(),   // Users cannot select a future date.
+    );
+    // If the user picked a date (i.e., didn't cancel), update our state.
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
   @override
   void dispose() {
     titleController.dispose();
@@ -34,6 +51,7 @@ class _AddTopicScreenState extends ConsumerState<AddTopicScreen> {
             subjectId: selectedSubject!.id!, // We know id is not null here
             title: titleController.text.trim(),
             notes: notesController.text.trim(),
+            studiedOn: selectedDate,
             ref: ref,
           );
       Navigator.of(context).pop();
@@ -102,11 +120,30 @@ class _AddTopicScreenState extends ConsumerState<AddTopicScreen> {
                         });
                       },
                       items: subjects.map<DropdownMenuItem<Subject>>((Subject subject) {
+                        final color = hexToColor(subject.color);
                         return DropdownMenuItem<Subject>(
                           value: subject,
-                          child: Text(subject.title),
+                          child: Text(
+                            subject.title,
+                            style: TextStyle(
+                              color: color, // Apply the subject's color to the text
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         );
                       }).toList(),
+                      selectedItemBuilder: (BuildContext context) {
+                        return subjects.map<Widget>((Subject subject) {
+                          final color = hexToColor(subject.color);
+                          return Text(
+                            subject.title,
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        }).toList();
+                      },
                     ),
                   ),
                 ),
@@ -116,6 +153,27 @@ class _AddTopicScreenState extends ConsumerState<AddTopicScreen> {
                 AuthField(
                   hintText: 'Add your revision notes here...',
                   controller: notesController,
+                ),
+                const SizedBox(height: 30),
+                const Text('Date Learned', style: TextStyle(fontSize: 16)),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    // A chip to display the selected date.
+                    Chip(
+                      label: Text(
+                        DateFormat.yMMMd().format(selectedDate), // e.g., "Sep 21, 2025"
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // An icon button to open the date picker.
+                    IconButton(
+                      icon: const Icon(Icons.edit_calendar_outlined),
+                      onPressed: () => _selectDate(context),
+                      tooltip: 'Change Date',
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 50),
                 AuthButton(
