@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/features/review/controller/review_controller.dart';
 import 'package:trirecall/features/topics/screens/add_topic_screen.dart';
+import 'package:trirecall/features/review/screens/review_screen.dart';
 
 // We now make it a ConsumerWidget to access Riverpod.
 class HomeScreen extends ConsumerWidget {
@@ -69,8 +70,13 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 40),
                 ElevatedButton(
                   onPressed: () {
-                    // TODO: Navigate to the Review Screen
-                    print('Start Review button pressed!');
+                    // 1. Start the session using the list of due topics.
+                    ref.read(reviewSessionProvider.notifier).startSession(dueTopics);
+                    
+                    // 2. Navigate to the ReviewScreen.
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => const ReviewScreen()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
