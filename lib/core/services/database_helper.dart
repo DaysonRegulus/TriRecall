@@ -93,6 +93,22 @@ class DatabaseHelper {
     });
   }
 
+  Future<List<Topic>> getTopicsForSubject(int subjectId) async {
+    final db = await instance.database;
+    // This is the core of the filtering logic. The `WHERE` clause tells SQL
+    // to only return rows where the 'subject_id' column matches the provided id.
+    final maps = await db.query(
+      'topics',
+      where: 'subject_id = ?',
+      whereArgs: [subjectId],
+      orderBy: 'created_at DESC', // Default sort by newest first.
+    );
+
+    return List.generate(maps.length, (i) {
+      return Topic.fromMap(maps[i]);
+    });
+  }
+
   Future<int> createTopic(Topic topic) async {
     final db = await instance.database;
     return await db.insert('topics', topic.toMap());

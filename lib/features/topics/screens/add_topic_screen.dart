@@ -114,6 +114,7 @@ class _AddTopicScreenState extends ConsumerState<AddTopicScreen> {
                     child: DropdownButton<Subject>(
                       isExpanded: true,
                       value: selectedSubject,
+                      alignment: Alignment.centerLeft,
                       onChanged: (Subject? newValue) {
                         setState(() {
                           selectedSubject = newValue;
@@ -135,12 +136,16 @@ class _AddTopicScreenState extends ConsumerState<AddTopicScreen> {
                       selectedItemBuilder: (BuildContext context) {
                         return subjects.map<Widget>((Subject subject) {
                           final color = hexToColor(subject.color);
-                          return Text(
-                            subject.title,
-                            style: TextStyle(
-                              color: color,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          return Row(
+                            children: [
+                              Text(
+                                subject.title,
+                                style: TextStyle(
+                                  color: color,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           );
                         }).toList();
                       },

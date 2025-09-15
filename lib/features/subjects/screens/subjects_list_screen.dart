@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trirecall/core/models/subject_model.dart';
 import 'package:trirecall/features/subjects/controller/subject_controller.dart';
 import 'package:trirecall/features/subjects/screens/add_subject_screen.dart';
+import 'package:trirecall/features/topics/screens/subject_topics_screen.dart'; 
 
 class SubjectsListScreen extends ConsumerWidget {
   const SubjectsListScreen({super.key});
@@ -37,7 +37,15 @@ class SubjectsListScreen extends ConsumerWidget {
               return ListTile(
                 leading: CircleAvatar(backgroundColor: color),
                 title: Text(subject.title, style: const TextStyle(fontSize: 18)),
-                // We'll add an onTap later to see topics in this subject.
+                // ADD THIS onTap LOGIC
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      // Pass the tapped subject to the new screen.
+                      builder: (context) => SubjectTopicsScreen(subject: subject),
+                    ),
+                  );
+                },
               );
             },
           );
