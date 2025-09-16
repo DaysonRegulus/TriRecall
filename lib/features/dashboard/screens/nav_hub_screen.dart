@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:trirecall/features/dashboard/screens/home_screen.dart';
 import 'package:trirecall/features/subjects/screens/subjects_list_screen.dart';
 import 'package:trirecall/features/topics/screens/all_topics_screen.dart';
+import 'package:trirecall/features/settings/screens/settings_screen.dart';
 
 class NavHubScreen extends StatefulWidget {
   const NavHubScreen({super.key});
@@ -19,6 +20,7 @@ class _NavHubScreenState extends State<NavHubScreen> {
     HomeScreen(),         // Index 0
     AllTopicsScreen(),      // Index 1
     SubjectsListScreen(), // Index 2
+    SettingsScreen(), // Index 3
   ];
 
   void _onItemTapped(int index) {
@@ -47,6 +49,10 @@ class _NavHubScreenState extends State<NavHubScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.category),
             label: 'Subjects',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings), // Our new icon
+            label: 'Settings',
           ),
         ],
         currentIndex: _selectedIndex,

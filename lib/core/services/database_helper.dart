@@ -156,4 +156,10 @@ class DatabaseHelper {
       whereArgs: [topic.id],
     );
   }
+
+  Future<void> close() async {
+    final db = await instance.database;
+    await db.close();
+    _database = null; // Set to null so it will be re-initialized on next access
+  }
 }
