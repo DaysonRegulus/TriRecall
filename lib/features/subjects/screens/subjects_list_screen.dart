@@ -37,12 +37,19 @@ class SubjectsListScreen extends ConsumerWidget {
               return ListTile(
                 leading: CircleAvatar(backgroundColor: color),
                 title: Text(subject.title, style: const TextStyle(fontSize: 18)),
-                // ADD THIS onTap LOGIC
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      // Pass the tapped subject to the new screen.
                       builder: (context) => SubjectTopicsScreen(subject: subject),
+                    ),
+                  );
+                },
+                onLongPress: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      // Navigate to AddSubjectScreen, but pass the current subject
+                      // to its `existingSubject` parameter to activate "Edit" mode.
+                      builder: (context) => AddSubjectScreen(existingSubject: subject),
                     ),
                   );
                 },

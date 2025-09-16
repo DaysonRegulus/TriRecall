@@ -80,6 +80,19 @@ class DatabaseHelper {
     });
   }
 
+  Future<int> updateSubject(Subject subject) async {
+    final db = await instance.database;
+    // The `db.update` helper method is the safest way to update a row.
+    // It takes the table name, a map of the new values, and a `where` clause
+    // to specify which row to update.
+    return await db.update(
+      'subjects',
+      subject.toMap(),
+      where: 'id = ?', // The '?' is a placeholder to prevent SQL injection attacks.
+      whereArgs: [subject.id], // The subject's ID is passed in safely.
+    );
+  }
+
   // --- CRUD Methods for Topics ---
 
   Future<List<Topic>> getAllTopics() async {

@@ -27,4 +27,16 @@ class Subject {
       color: map['color'],
     );
   }
+
+  Subject copyWith({
+    int? id,
+    String? title,
+    String? color,
+  }) {
+    return Subject(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      color: color ?? this.color,
+    );
+  }
 }

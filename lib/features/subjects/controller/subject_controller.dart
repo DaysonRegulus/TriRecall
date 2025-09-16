@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/core/models/subject_model.dart';
 import 'package:trirecall/core/services/database_helper.dart';
+import 'package:trirecall/features/topics/controller/topic_controller.dart';
 
 // This provider will expose the SubjectController.
 final subjectControllerProvider = StateNotifierProvider<SubjectController, bool>((ref) {
@@ -30,6 +31,23 @@ class SubjectController extends StateNotifier<bool> {
     // that the old data from `subjectsProvider` is no longer valid.
     // This will cause it to re-fetch the list, and our UI will update automatically.
     ref.invalidate(subjectsProvider);
+    
+    state = false;
+  }
+  Future<void> updateSubject({
+    required Subject subject,
+    required WidgetRef ref,
+  }) async {
+    state = true;
+    await DatabaseHelper.instance.updateSubject(subject);
+    
+    // Just like with creating, we MUST invalidate the provider to force the
+    // UI (like the SubjectsListScreen) to rebuild with the fresh data.
+    ref.invalidate(subjectsProvider);
+
+    // We also invalidate the topics provider because if a subject color changes,
+    // the topic list dropdown should reflect that change immediately.
+    ref.invalidate(allTopicsProvider);
     
     state = false;
   }

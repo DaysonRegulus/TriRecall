@@ -5,6 +5,7 @@ import 'package:trirecall/features/auth/widgets/auth_field.dart';
 import 'package:trirecall/features/subjects/controller/subject_controller.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:trirecall/core/utils/color_utils.dart';
+import 'package:trirecall/core/models/subject_model.dart';
 
 // We'll offer a predefined list of colors for simplicity.
 const List<String> subjectColors = [
@@ -18,7 +19,10 @@ const List<String> subjectColors = [
 ];
 
 class AddSubjectScreen extends ConsumerStatefulWidget {
-  const AddSubjectScreen({super.key});
+  final Subject? existingSubject;
+  const AddSubjectScreen({super.key, this.existingSubject});
+  
+  
 
   @override
   ConsumerState<AddSubjectScreen> createState() => _AddSubjectScreenState();
@@ -27,6 +31,17 @@ class AddSubjectScreen extends ConsumerStatefulWidget {
 class _AddSubjectScreenState extends ConsumerState<AddSubjectScreen> {
   final titleController = TextEditingController();
   String selectedColorHex = '#BB86FC'; // Default to our primary purple
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if we are in "Edit" mode.
+    if (widget.existingSubject != null) {
+      // If so, pre-fill the form fields with the existing data.
+      titleController.text = widget.existingSubject!.title;
+      selectedColorHex = widget.existingSubject!.color;
+    }
+  }
 
   void _showColorPicker() {
     // Convert our hex string to a Color object for the picker.
@@ -80,13 +95,29 @@ class _AddSubjectScreenState extends ConsumerState<AddSubjectScreen> {
     super.dispose();
   }
 
-  void onAddSubject() {
-    if (titleController.text.trim().isNotEmpty) {
-      ref.read(subjectControllerProvider.notifier).createSubject(
-            title: titleController.text.trim(),
-            color: selectedColorHex, // Use the new state variable
-            ref: ref,
-          );
+  void _submitForm() {
+    final title = titleController.text.trim();
+    if (title.isNotEmpty) {
+      final bool isEditing = widget.existingSubject != null;
+      
+      if (isEditing) {
+        // If we are editing, create an updated subject object using copyWith.
+        final updatedSubject = widget.existingSubject!.copyWith(
+          title: title,
+          color: selectedColorHex,
+        );
+        ref.read(subjectControllerProvider.notifier).updateSubject(
+              subject: updatedSubject,
+              ref: ref,
+            );
+      } else {
+        // Otherwise, call the original createSubject method.
+        ref.read(subjectControllerProvider.notifier).createSubject(
+              title: title,
+              color: selectedColorHex,
+              ref: ref,
+            );
+      }
       Navigator.of(context).pop();
     }
   }
@@ -94,9 +125,10 @@ class _AddSubjectScreenState extends ConsumerState<AddSubjectScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(subjectControllerProvider);
+    final bool isEditing = widget.existingSubject != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Add New Subject')),
+      appBar: AppBar(title: Text(isEditing ? 'Edit Subject' : 'Add New Subject')),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -138,8 +170,11 @@ class _AddSubjectScreenState extends ConsumerState<AddSubjectScreen> {
             ),
             const Spacer(), // Pushes the button to the bottom
             AuthButton(
-              buttonText: isLoading ? 'Adding...' : 'Add Subject',
-              onPressed: isLoading ? () {} : onAddSubject,
+              // Use the boolean to set the button text.
+              buttonText: isLoading
+                  ? (isEditing ? 'Updating...' : 'Adding...')
+                  : (isEditing ? 'Update Subject' : 'Add Subject'),
+              onPressed: isLoading ? () {} : _submitForm,
             ),
             const SizedBox(height: 20),
           ],
