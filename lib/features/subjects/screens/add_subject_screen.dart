@@ -37,11 +37,24 @@ class _AddSubjectScreenState extends ConsumerState<AddSubjectScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Pick a color'),
         content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: pickerColor,
-            onColorChanged: (color) {
-              pickerColor = color;
-            },
+          // We wrap the ColorPicker in a SizedBox to give it a defined width.
+          // This prevents its internal layout from overflowing the dialog's boundaries.
+          child: SizedBox(
+            width: double.infinity,
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (color) {
+                pickerColor = color;
+              },
+              // This property enables the Hex, RGB, and HSV input fields.
+              displayThumbColor: true, 
+
+              // We will hide the alpha/transparency slider as we don't need it.
+              enableAlpha: false,
+
+              // This provides a label for the Hex input field.
+              hexInputBar: true,
+            ),
           ),
         ),
         actions: <Widget>[
