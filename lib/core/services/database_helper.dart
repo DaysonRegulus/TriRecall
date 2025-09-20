@@ -146,6 +146,35 @@ class DatabaseHelper {
 
   // --- CRUD Methods for Topics ---
 
+  Future<DateCard?> getDateCardByDate(DateTime date) async {
+    final db = await instance.database;
+    // We need to compare just the date part, so we normalize the DateTime object.
+    final dateString = DateTime(date.year, date.month, date.day).toIso8601String();
+    
+    final maps = await db.query(
+      'date_cards',
+      where: 'study_date = ?',
+      whereArgs: [dateString],
+      limit: 1, // We only expect one result.
+    );
+
+    if (maps.isNotEmpty) {
+      return DateCard.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  /// Fetches all topics that are linked to a specific DateCard ID.
+  Future<List<Topic>> getTopicsForDateCard(int dateCardId) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'topics',
+      where: 'date_card_id = ?',
+      whereArgs: [dateCardId],
+    );
+    return List.generate(maps.length, (i) => Topic.fromMap(maps[i]));
+  }
+
   /// Fetches all DateCards that are due for review today or are overdue.
   Future<List<DateCard>> getDue_DateCards() async {
     final db = await instance.database;
@@ -244,6 +273,16 @@ class DatabaseHelper {
       topic.toMap(),
       where: 'id = ?',
       whereArgs: [topic.id],
+    );
+  }
+
+  /// Deletes a topic from the database given its ID.
+  Future<void> deleteTopic(int id) async {
+    final db = await instance.database;
+    await db.delete(
+      'topics',
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 

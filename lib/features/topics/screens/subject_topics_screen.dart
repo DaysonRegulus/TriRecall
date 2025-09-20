@@ -102,12 +102,51 @@ class _SubjectTopicsScreenState extends ConsumerState<SubjectTopicsScreen> {
                         itemCount: displayedTopics.length,
                         itemBuilder: (context, index) {
                           final topic = displayedTopics[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                            child: ListTile(
-                              title: Text(topic.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text(
-                                'Status: ${topic.status} | Due: ${topic.nextDue != null ? topic.nextDue!.toLocal().toString().split(' ')[0] : 'N/A'}'
+                          return Dismissible(
+                            key: ValueKey(topic.id),
+                            background: Container(
+                              color: Colors.red.shade800,
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20.0),
+                              child: const Icon(Icons.delete, color: Colors.white),
+                            ),
+                            direction: DismissDirection.endToStart,
+                            confirmDismiss: (direction) async {
+                              return await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Confirm Deletion'),
+                                  content: Text('Are you sure you want to delete "${topic.title}"? This action cannot be undone.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(true),
+                                      child: const Text('Delete'),
+                                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            onDismissed: (direction) {
+                              ref.read(topicControllerProvider.notifier).deleteTopic(
+                                    topicId: topic.id!,
+                                    ref: ref,
+                                  );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('"${topic.title}" was deleted.')),
+                              );
+                            },
+                            child: Card(
+                              margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                              child: ListTile(
+                                title: Text(topic.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                subtitle: Text(
+                                  'Status: ${topic.status} | Due: ${topic.nextDue != null ? topic.nextDue!.toLocal().toString().split(' ')[0] : 'N/A'}'
+                                ),
                               ),
                             ),
                           );

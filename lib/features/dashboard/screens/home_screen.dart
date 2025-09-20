@@ -5,6 +5,7 @@ import 'package:trirecall/core/models/due_item_model.dart';
 import 'package:trirecall/core/utils/color_utils.dart';
 import 'package:trirecall/features/review/controller/due_items_controller.dart';
 import 'package:trirecall/features/topics/screens/add_topic_screen.dart';
+import 'package:trirecall/features/review/screens/date_card_review_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -81,8 +82,11 @@ class _DateCardListItem extends ConsumerWidget {
         subtitle: Text(DateFormat.yMMMd().format(dateCard.studyDate)),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
-          // TODO in Step 16: Navigate to DateCardReviewScreen
-          print('Tapped on DateCard for ${dateCard.studyDate}');
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => DateCardReviewScreen(dateCard: dateCard),
+            ),
+          );
         },
       ),
     );
