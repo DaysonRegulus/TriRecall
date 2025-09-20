@@ -5,6 +5,7 @@ class DateCard {
   final DateTime? nextDue;
   final String status; // 'active', 'mastered'
   final bool isIncomplete; // Our new flag for data entry tracking
+  final DateTime? lastReviewedAt;
 
   DateCard({
     this.id,
@@ -13,6 +14,7 @@ class DateCard {
     this.nextDue,
     this.status = 'active',
     this.isIncomplete = true, // Defaults to incomplete
+    this.lastReviewedAt,
   });
 
   // A copyWith method is essential for easily creating updated versions of the object.
@@ -24,6 +26,7 @@ class DateCard {
     bool setNextDueToNull = false,
     String? status,
     bool? isIncomplete,
+    DateTime? lastReviewedAt,
   }) {
     return DateCard(
       id: id ?? this.id,
@@ -32,6 +35,7 @@ class DateCard {
       nextDue: setNextDueToNull ? null : nextDue ?? this.nextDue,
       status: status ?? this.status,
       isIncomplete: isIncomplete ?? this.isIncomplete,
+      lastReviewedAt: lastReviewedAt ?? this.lastReviewedAt,
     );
   }
 
@@ -45,6 +49,7 @@ class DateCard {
       'status': status,
       // SQLite doesn't have a boolean type, so we store it as an integer (0 or 1).
       'is_incomplete': isIncomplete ? 1 : 0,
+      'last_reviewed_at': lastReviewedAt?.toIso8601String(),
     };
   }
 
@@ -57,6 +62,7 @@ class DateCard {
       status: map['status'],
       // Convert the integer back to a boolean.
       isIncomplete: map['is_incomplete'] == 1,
+      lastReviewedAt: map['last_reviewed_at'] != null ? DateTime.parse(map['last_reviewed_at']) : null,
     );
   }
 }

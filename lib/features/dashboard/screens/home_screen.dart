@@ -78,7 +78,19 @@ class _DateCardListItem extends ConsumerWidget {
       clipBehavior: Clip.antiAlias, // Ensures the border respects the shape
       child: ListTile(
         leading: const CircleAvatar(child: Icon(Icons.calendar_today)),
-        title: const Text('Review Study Day', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Row(
+          children: [
+            const Text('Review Study Day', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(width: 8),
+            // This is the conditional logic. If the card is incomplete, show the icon.
+            if (dateCard.isIncomplete)
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.amber,
+                size: 18,
+              ),
+          ],
+        ),
         subtitle: Text(DateFormat.yMMMd().format(dateCard.studyDate)),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {

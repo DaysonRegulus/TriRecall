@@ -31,7 +31,7 @@ class DatabaseHelper {
     // does not exist at the given path.
     return await openDatabase(
       path,
-      version: 2, // Used for database migrations.
+      version: 3, // Used for database migrations.
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -61,50 +61,96 @@ class DatabaseHelper {
     ''');
     print('DB UPGRADE: Migration to version 2 complete.');
   }
-}
+  if (oldVersion < 3) {
+      // --- THIS IS THE NEW MIGRATION LOGIC FOR THIS STEP ---
+      print('DB UPGRADE: Migrating from version 2 to 3');
+      // Add the new last_reviewed_at column to the date_cards table.
+      await db.execute('''
+        ALTER TABLE date_cards ADD COLUMN last_reviewed_at TEXT
+      ''');
+      print('DB UPGRADE: Migration to version 3 complete.');
+    }
+  }
 
   // This function is called when the database is created for the first time.
   // This is where we define the structure of our tables.
   Future<void> _onCreate(Database db, int version) async {
-  await db.execute('''
-    CREATE TABLE subjects (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      color TEXT NOT NULL
-    )
-  ''');
+    // This method now contains the complete, final schema for a brand new install.
+    await db.execute('''
+      CREATE TABLE subjects (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        color TEXT NOT NULL
+      )
+    ''');
 
-  // Create BOTH tables for a fresh install.
-  await db.execute('''
-    CREATE TABLE date_cards (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      study_date TEXT NOT NULL UNIQUE,
-      interval_index INTEGER NOT NULL DEFAULT 0,
-      next_due TEXT,
-      status TEXT NOT NULL,
-      is_incomplete INTEGER NOT NULL DEFAULT 1
-    )
-  ''');
-  
-  await db.execute('''
-    CREATE TABLE topics (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      subject_id INTEGER NOT NULL,
-      date_card_id INTEGER REFERENCES date_cards(id) ON DELETE RESTRICT,
-      title TEXT NOT NULL,
-      notes TEXT NOT NULL,
-      studied_on TEXT NOT NULL,
-      interval_index INTEGER NOT NULL DEFAULT 0,
-      next_due TEXT,
-      status TEXT NOT NULL,
-      last_reviewed_at TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      FOREIGN KEY (subject_id) REFERENCES subjects (id) ON DELETE CASCADE
-    )
-  ''');
+    await db.execute('''
+      CREATE TABLE date_cards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        study_date TEXT NOT NULL UNIQUE,
+        interval_index INTEGER NOT NULL DEFAULT 0,
+        next_due TEXT,
+        status TEXT NOT NULL,
+        is_incomplete INTEGER NOT NULL DEFAULT 1,
+        last_reviewed_at TEXT
+      )
+    ''');
+    
+    await db.execute('''
+      CREATE TABLE topics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        subject_id INTEGER NOT NULL,
+        date_card_id INTEGER REFERENCES date_cards(id) ON DELETE RESTRICT,
+        title TEXT NOT NULL,
+        notes TEXT NOT NULL,
+        studied_on TEXT NOT NULL,
+        interval_index INTEGER NOT NULL DEFAULT 0,
+        next_due TEXT,
+        status TEXT NOT NULL,
+        last_reviewed_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (subject_id) REFERENCES subjects (id) ON DELETE CASCADE
+      )
+    ''');
 }
 
   // --- CRUD Methods for Subjects ---
+
+  /// Fetches all DateCards from the database, sorted by study date.
+  Future<List<DateCard>> getAllDateCards() async {
+    final db = await instance.database;
+    final maps = await db.query('date_cards', orderBy: 'study_date DESC');
+    return List.generate(maps.length, (i) => DateCard.fromMap(maps[i]));
+  }
+
+  /// Deletes a DateCard from the database given its ID.
+  Future<void> deleteDateCard(int id) async {
+    final db = await instance.database;
+    await db.delete('date_cards', where: 'id = ?', whereArgs: [id]);
+  }
+
+  /// Fetches all DateCards that are marked as incomplete.
+  Future<List<DateCard>> getIncompleteDateCards() async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'date_cards',
+      where: 'is_incomplete = ?',
+      whereArgs: [1], // 1 represents 'true' in our database
+      orderBy: 'study_date ASC', // Show the oldest incomplete ones first
+    );
+    return List.generate(maps.length, (i) => DateCard.fromMap(maps[i]));
+  }
+
+  /// Updates a given DateCard in the database.
+  Future<void> updateDateCard(DateCard dateCard) async {
+    final db = await instance.database;
+    await db.update(
+      'date_cards',
+      dateCard.toMap(),
+      where: 'id = ?',
+      whereArgs: [dateCard.id],
+    );
+  }
 
   /// Creates a new DateCard in the database.
   /// Uses `ConflictAlgorithm.ignore` to silently fail if a DateCard for the

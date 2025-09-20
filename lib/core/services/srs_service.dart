@@ -12,7 +12,7 @@ enum ReviewAction {
 
 class SRSService {
   // Our fixed SRS schedule (in days). The index corresponds to interval_index.
-  static const List<int> _intervals = [1, 3, 7, 15, 30];
+  static const List<int> intervals = [1, 3, 7, 15, 30];
 
   /// Takes a topic and a review action, and returns the topic with its
   /// new SRS state calculated.
@@ -31,25 +31,25 @@ class SRSService {
     // A switch statement is a very clean way to handle the different actions.
     switch (action) {
       case ReviewAction.revised:
-        newIntervalIndex = min(currentTopic.intervalIndex + 1, _intervals.length);
-        if (newIntervalIndex >= _intervals.length) {
+        newIntervalIndex = min(currentTopic.intervalIndex + 1, intervals.length);
+        if (newIntervalIndex >= intervals.length) {
           // The topic has graduated to "Mastered".
           newStatus = 'mastered';
           newNextDue = null;
         } else {
           newStatus = 'active';
-          newNextDue = today.add(Duration(days: _intervals[newIntervalIndex]));
+          newNextDue = today.add(Duration(days: intervals[newIntervalIndex]));
         }
         break;
 
       case ReviewAction.needsWork:
         newIntervalIndex = max(currentTopic.intervalIndex - 1, 0);
         newStatus = 'active';
-        newNextDue = today.add(Duration(days: _intervals[newIntervalIndex]));
+        newNextDue = today.add(Duration(days: intervals[newIntervalIndex]));
         break;
         
       case ReviewAction.mastered:
-        newIntervalIndex = _intervals.length;
+        newIntervalIndex = intervals.length;
         newStatus = 'mastered';
         newNextDue = null;
         break;

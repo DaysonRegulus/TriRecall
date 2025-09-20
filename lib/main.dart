@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/core/theme/theme.dart';
 import 'package:trirecall/core/services/database_helper.dart';
+import 'package:trirecall/core/services/data_maintenance_service.dart';
 import 'package:trirecall/features/dashboard/screens/nav_hub_screen.dart'; 
 
 Future<void> main() async {
@@ -9,6 +10,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize the database.
   await DatabaseHelper.instance.database; 
+
+  // Run the decay check in the background. We don't need to `await` it,
+  // as the app can continue to load while this happens.
+  DataMaintenanceService().applyDecay();
   
   runApp(const ProviderScope(child: MyApp()));
 }

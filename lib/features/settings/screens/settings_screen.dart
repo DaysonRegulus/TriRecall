@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/features/settings/controller/settings_controller.dart';
 import 'package:trirecall/features/settings/screens/schedule_settings_screen.dart'; 
+import 'package:trirecall/features/settings/screens/date_card_management_screen.dart';
+import 'package:trirecall/features/settings/screens/incomplete_date_cards_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -17,6 +19,17 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            ListTile(
+              leading: const Icon(Icons.edit_calendar),
+              title: const Text('Manage Study Dates'),
+              subtitle: const Text('Manually add or delete specific study dates.'),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const DateCardManagementScreen(),
+                ));
+              },
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.calendar_month),
               title: const Text('Study Schedule'),
@@ -45,6 +58,18 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () {
                 // Call the controller method.
                 ref.read(settingsControllerProvider.notifier).importDatabase(context, ref);
+              },
+            ),
+            const Divider(),
+            // ADD THIS NEW LISTTILE
+            ListTile(
+              leading: const Icon(Icons.rule_folder_outlined, color: Colors.amber),
+              title: const Text('Incomplete Study Dates'),
+              subtitle: const Text('View dates you need to finish logging.'),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const IncompleteDateCardsScreen(),
+                ));
               },
             ),
           ],
