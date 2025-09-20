@@ -1,6 +1,7 @@
 class Topic {
   final int? id;
   final int subjectId; // Foreign key to link to the Subject table.
+  final int? dateCardId; 
   final String title;
   final String notes;
   final DateTime studiedOn; // The date the topic is associated with.
@@ -13,6 +14,7 @@ class Topic {
   Topic({
     this.id,
     required this.subjectId,
+    this.dateCardId,
     required this.title,
     required this.notes,
     required this.studiedOn,
@@ -27,6 +29,7 @@ class Topic {
     return {
       'id': id,
       'subject_id': subjectId,
+      'date_card_id': dateCardId,
       'title': title,
       'notes': notes,
       // We store DateTimes as ISO 8601 strings. This is a robust and
@@ -44,6 +47,7 @@ class Topic {
     return Topic(
       id: map['id'],
       subjectId: map['subject_id'],
+      dateCardId: map['date_card_id'],
       title: map['title'],
       notes: map['notes'],
       // We parse the string from the database back into a DateTime object.
@@ -59,6 +63,7 @@ class Topic {
   Topic copyWith({
     int? id,
     int? subjectId,
+    int? dateCardId,
     String? title,
     String? notes,
     DateTime? studiedOn,
@@ -72,6 +77,7 @@ class Topic {
     return Topic(
       id: id ?? this.id,
       subjectId: subjectId ?? this.subjectId,
+      dateCardId: dateCardId ?? this.dateCardId,
       title: title ?? this.title,
       notes: notes ?? this.notes,
       studiedOn: studiedOn ?? this.studiedOn,

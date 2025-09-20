@@ -2,6 +2,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:trirecall/core/models/subject_model.dart';
 import 'package:trirecall/core/models/topic_model.dart';
+import 'package:trirecall/core/models/date_card_model.dart';
 
 class DatabaseHelper {
   // A private constructor. This class cannot be instantiated from the outside.
@@ -30,42 +31,92 @@ class DatabaseHelper {
     // does not exist at the given path.
     return await openDatabase(
       path,
-      version: 1, // Used for database migrations.
+      version: 2, // Used for database migrations.
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  // This switch statement is a robust way to handle multiple migrations over time.
+  // If we were upgrading from version 2 to 3, we'd add another case.
+  if (oldVersion < 2) {
+    print('DB UPGRADE: Migrating from version 1 to 2');
+    // Create the new date_cards table.
+    await db.execute('''
+      CREATE TABLE date_cards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        study_date TEXT NOT NULL UNIQUE,
+        interval_index INTEGER NOT NULL DEFAULT 0,
+        next_due TEXT,
+        status TEXT NOT NULL,
+        is_incomplete INTEGER NOT NULL DEFAULT 1
+      )
+    ''');
+    
+    // Add the new date_card_id column to the existing topics table.
+    // We use ON DELETE RESTRICT as we decided: prevent deleting a DateCard if topics are linked to it.
+    await db.execute('''
+      ALTER TABLE topics ADD COLUMN date_card_id INTEGER REFERENCES date_cards(id) ON DELETE RESTRICT
+    ''');
+    print('DB UPGRADE: Migration to version 2 complete.');
+  }
+}
 
   // This function is called when the database is created for the first time.
   // This is where we define the structure of our tables.
   Future<void> _onCreate(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE subjects (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        color TEXT NOT NULL
-      )
-    ''');
+  await db.execute('''
+    CREATE TABLE subjects (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      color TEXT NOT NULL
+    )
+  ''');
 
-    await db.execute('''
-      CREATE TABLE topics (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        subject_id INTEGER NOT NULL,
-        title TEXT NOT NULL,
-        notes TEXT NOT NULL,
-        studied_on TEXT NOT NULL,
-        interval_index INTEGER NOT NULL DEFAULT 0,
-        next_due TEXT,
-        status TEXT NOT NULL,
-        last_reviewed_at TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        FOREIGN KEY (subject_id) REFERENCES subjects (id) ON DELETE CASCADE
-      )
-    ''');
-    
-    // We can add a 'reviews' table here later if needed.
-  }
+  // Create BOTH tables for a fresh install.
+  await db.execute('''
+    CREATE TABLE date_cards (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      study_date TEXT NOT NULL UNIQUE,
+      interval_index INTEGER NOT NULL DEFAULT 0,
+      next_due TEXT,
+      status TEXT NOT NULL,
+      is_incomplete INTEGER NOT NULL DEFAULT 1
+    )
+  ''');
+  
+  await db.execute('''
+    CREATE TABLE topics (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      subject_id INTEGER NOT NULL,
+      date_card_id INTEGER REFERENCES date_cards(id) ON DELETE RESTRICT,
+      title TEXT NOT NULL,
+      notes TEXT NOT NULL,
+      studied_on TEXT NOT NULL,
+      interval_index INTEGER NOT NULL DEFAULT 0,
+      next_due TEXT,
+      status TEXT NOT NULL,
+      last_reviewed_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (subject_id) REFERENCES subjects (id) ON DELETE CASCADE
+    )
+  ''');
+}
 
   // --- CRUD Methods for Subjects ---
+
+  /// Creates a new DateCard in the database.
+  /// Uses `ConflictAlgorithm.ignore` to silently fail if a DateCard for the
+  /// same `study_date` already exists, which is perfect for our generation logic.
+  Future<void> createDateCard(DateCard dateCard) async {
+    final db = await instance.database;
+    await db.insert(
+      'date_cards',
+      dateCard.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+  }
 
   Future<int> createSubject(Subject subject) async {
     final db = await instance.database;
@@ -94,6 +145,45 @@ class DatabaseHelper {
   }
 
   // --- CRUD Methods for Topics ---
+
+  /// Fetches all DateCards that are due for review today or are overdue.
+  Future<List<DateCard>> getDue_DateCards() async {
+    final db = await instance.database;
+    final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1).toIso8601String();
+    
+    final maps = await db.query(
+      'date_cards',
+      where: 'status = ? AND next_due IS NOT NULL AND next_due < ?',
+      whereArgs: ['active', tomorrow],
+    );
+    
+    return List.generate(maps.length, (i) => DateCard.fromMap(maps[i]));
+  }
+
+  /// Fetches all "stray" topics. These are topics that are due today,
+  /// but their parent DateCard is NOT due today.
+  Future<List<Topic>> getDue_Stray_Topics(List<int> due_DateCardIds) async {
+    final db = await instance.database;
+    final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1).toIso8601String();
+
+    // This is a more complex query. It finds topics that are due today,
+    // AND their parent date_card_id is NOT in the list of due date cards we provide.
+    String whereClause = 'status = ? AND next_due IS NOT NULL AND next_due < ?';
+    if (due_DateCardIds.isNotEmpty) {
+      // The `join(',')` creates a string like '1,2,3' for the SQL query.
+      whereClause += ' AND date_card_id NOT IN (${due_DateCardIds.join(',')})';
+    }
+
+    final maps = await db.query(
+      'topics',
+      where: whereClause,
+      whereArgs: ['active', tomorrow],
+    );
+
+    return List.generate(maps.length, (i) => Topic.fromMap(maps[i]));
+  }
 
   Future<List<Topic>> getAllTopics() async {
     final db = await instance.database;

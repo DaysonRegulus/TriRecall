@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/features/settings/controller/settings_controller.dart';
+import 'package:trirecall/features/settings/screens/schedule_settings_screen.dart'; 
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -16,6 +17,17 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            ListTile(
+              leading: const Icon(Icons.calendar_month),
+              title: const Text('Study Schedule'),
+              subtitle: const Text('Set your start date and weekly study days.'),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const ScheduleSettingsScreen(),
+                ));
+              },
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.download_for_offline),
               title: const Text('Export Data'),
