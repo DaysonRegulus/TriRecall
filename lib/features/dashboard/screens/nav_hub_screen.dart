@@ -1,3 +1,5 @@
+// lib/features/dashboard/screens/nav_hub_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:trirecall/features/dashboard/screens/home_screen.dart';
 import 'package:trirecall/features/subjects/screens/subjects_list_screen.dart';
@@ -12,18 +14,17 @@ class NavHubScreen extends StatefulWidget {
 }
 
 class _NavHubScreenState extends State<NavHubScreen> {
-  int _selectedIndex = 0; // The index of the currently selected tab.
+  int _selectedIndex = 0;
 
-  // A list of the main screens for our app. The order here
-  // must match the order of the BottomNavigationBarItems.
   static const List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),         // Index 0
-    AllTopicsScreen(),      // Index 1
-    SubjectsListScreen(), // Index 2
-    SettingsScreen(), // Index 3
+    HomeScreen(),
+    AllTopicsScreen(),
+    SubjectsListScreen(),
+    SettingsScreen(),
   ];
 
-  void _onItemTapped(int index) {
+  // The name of this function is updated for clarity.
+  void _onDestinationSelected(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -32,36 +33,46 @@ class _NavHubScreenState extends State<NavHubScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // The body will be the screen corresponding to the selected tab index.
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.today),
+
+      // --- REFACTORED WIDGET ---
+      bottomNavigationBar: NavigationBar(
+        // The selected index determines which destination gets the indicator pill.
+        selectedIndex: _selectedIndex,
+        
+        // The callback is now semantically named `onDestinationSelected`.
+        onDestinationSelected: _onDestinationSelected,
+        
+        // The theme automatically handles the background color, selected/unselected
+        // item colors, and the indicator color and shape. No manual styling needed!
+        
+        // We now use a list of `NavigationDestination` widgets.
+        destinations: const <NavigationDestination>[
+          NavigationDestination(
+            // Best Practice: Use outlined icons for inactive tabs...
+            icon: Icon(Icons.today_outlined),
+            // ...and filled icons for the active tab for clear visual distinction.
+            selectedIcon: Icon(Icons.today),
             label: 'Today',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
+          NavigationDestination(
+            icon: Icon(Icons.list_alt_outlined),
+            selectedIcon: Icon(Icons.list_alt),
             label: 'All Topics',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category),
+          NavigationDestination(
+            icon: Icon(Icons.category_outlined),
+            selectedIcon: Icon(Icons.category),
             label: 'Subjects',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings), // Our new icon
+          NavigationDestination(
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings),
             label: 'Settings',
           ),
         ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        // Theming for the navigation bar
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed, // Ensures all items are always visible
       ),
     );
   }

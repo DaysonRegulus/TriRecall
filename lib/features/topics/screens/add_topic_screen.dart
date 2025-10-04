@@ -94,14 +94,14 @@ class _AddTopicScreenState extends ConsumerState<AddTopicScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Topic Title', style: TextStyle(fontSize: 16)),
+                Text('Topic Title', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 10),
                 AuthField(
                   hintText: 'e.g., Big O Notation',
                   controller: titleController,
                 ),
                 const SizedBox(height: 30),
-                const Text('Subject', style: TextStyle(fontSize: 16)),
+                Text('Subject', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 10),
                 // Dropdown menu to select a subject.
                 Container(
@@ -153,14 +153,14 @@ class _AddTopicScreenState extends ConsumerState<AddTopicScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                const Text('Notes', style: TextStyle(fontSize: 16)),
+                Text('Notes', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 10),
                 AuthField(
                   hintText: 'Add your revision notes here...',
                   controller: notesController,
                 ),
                 const SizedBox(height: 30),
-                const Text('Date Learned', style: TextStyle(fontSize: 16)),
+                Text('Date Learned', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 10),
                 Row(
                   children: [

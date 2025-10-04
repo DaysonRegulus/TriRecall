@@ -1,3 +1,5 @@
+// lib/features/subjects/screens/subjects_list_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/features/subjects/controller/subject_controller.dart';
@@ -36,7 +38,7 @@ class SubjectsListScreen extends ConsumerWidget {
               final color = Color(int.parse(subject.color.substring(1, 7), radix: 16) + 0xFF000000);
               return ListTile(
                 leading: CircleAvatar(backgroundColor: color),
-                title: Text(subject.title, style: const TextStyle(fontSize: 18)),
+                title: Text(subject.title, style: Theme.of(context).textTheme.titleLarge),
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(

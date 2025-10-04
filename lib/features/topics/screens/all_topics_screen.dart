@@ -45,10 +45,12 @@ class AllTopicsScreen extends ConsumerWidget {
                 
                 // This is the background that shows up as you swipe.
                 background: Container(
-                  color: Colors.red.shade800,
+                  // Use the theme's error color for a consistent "destructive" signal.
+                  color: Theme.of(context).colorScheme.errorContainer,
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20.0),
-                  child: const Icon(Icons.delete, color: Colors.white),
+                  // Use the corresponding "on" color for the icon.
+                  child: Icon(Icons.delete, color: Theme.of(context).colorScheme.onErrorContainer),
                 ),
                 
                 // We only want to allow swiping from right to left.

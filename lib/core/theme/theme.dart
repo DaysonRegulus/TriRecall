@@ -1,64 +1,70 @@
 // lib/core/theme/theme.dart
 
 import 'package:flutter/material.dart';
-import 'package:trirecall/core/theme/app_palette.dart';
 
-// This class defines the global theme data for the app.
 class AppTheme {
-  // A helper method to create a consistent border style for input fields.
-  static _border([Color color = AppPalette.borderColor]) => OutlineInputBorder(
-        borderSide: BorderSide(
-          color: color,
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(10),
-      );
+  static final Color _seedColor = const Color(0xFFBB86FC);
 
-  // The main dark theme configuration for the application.
-  static final darkThemeMode = ThemeData.dark().copyWith(
-    // The default background color for all screens (Scaffolds).
-    scaffoldBackgroundColor: AppPalette.backgroundColor,
+  // --- DARK THEME ---
+  static final darkThemeMode = ThemeData(
+    // 1. Set useMaterial3 to true in the main constructor.
+    useMaterial3: true,
 
-    // Theming for AppBars.
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppPalette.backgroundColor,
-      elevation: 0, // No shadow for a flatter look.
+    // 2. Provide the ColorScheme generated from the seed.
+    // The brightness property ensures it's a dark mode scheme.
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: Brightness.dark,
     ),
 
+    // 3. Component theme overrides remain the same.
+    // We are still just tweaking the appearance, not the core colors.
     cardTheme: CardThemeData(
-      color: AppPalette.secondaryColor, // Use our secondary color for cards
-      elevation: 2, // Give it a slight shadow
+      elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
       ),
     ),
 
-    // Theming for text input fields.
     inputDecorationTheme: InputDecorationTheme(
-      contentPadding: const EdgeInsets.all(18),
-      border: _border(),
-      enabledBorder: _border(),
-      focusedBorder: _border(AppPalette.primaryColor),
-      errorBorder: _border(AppPalette.errorColor),
-      hintStyle: const TextStyle(
-        color: AppPalette.greyColor,
-        fontWeight: FontWeight.w500,
+      filled: true,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      hintStyle: TextStyle(
+        color: Colors.grey.shade600,
+      ),
+    ),
+  );
+
+  // --- LIGHT THEME ---
+  static final lightThemeMode = ThemeData(
+    // 1. Set useMaterial3 to true in the main constructor.
+    useMaterial3: true,
+
+    // 2. Provide the ColorScheme. The default brightness is light.
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: Brightness.light,
+    ),
+
+    // 3. Component theme overrides.
+    cardTheme: CardThemeData(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
     ),
     
-    // Theming for ElevatedButton (our primary button type).
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppPalette.primaryColor,
-        foregroundColor: AppPalette.whiteColor, // Text color
-        minimumSize: const Size(double.infinity, 52), // Full width, fixed height
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        textStyle: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        )
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      hintStyle: TextStyle(
+        color: Colors.grey.shade500,
       ),
     ),
   );
