@@ -2,7 +2,7 @@
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 
-A focused, offline-first spaced repetition app designed for efficient, date-based revision, initially tailored for GATE CS + DA preparation.
+A focused, offline-first spaced repetition app designed for efficient, date-based revision.
 
 ## About The Project
 
