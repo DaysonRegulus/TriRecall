@@ -10,15 +10,17 @@ class ScheduleService {
   Future<void> generateMissingDateCards() async {
     final startDate = await _settingsService.getStartDate();
     final studyDays = await _settingsService.getStudyDays();
-    
-    // If the user hasn't set a start date, there's nothing to do.
+
     if (startDate == null) {
       return;
     }
 
-    final today = DateTime.now();
-    
-    // Loop through every single day from the start date until today.
+    // 1. Get the current moment.
+    final now = DateTime.now();
+    // 2. "Normalize" it to create a date at midnight. This removes the time component.
+    final today = DateTime(now.year, now.month, now.day);
+    // This loop now works reliably because we are comparing dates without times.
+    // It will correctly loop up to and including `today`.
     for (var day = startDate; day.isBefore(today.add(const Duration(days: 1))); day = day.add(const Duration(days: 1))) {
       // The `weekday` property returns 1 for Monday and 7 for Sunday.
       // We check if the current day in the loop is one of the user's selected study days.

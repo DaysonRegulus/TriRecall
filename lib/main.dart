@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trirecall/core/theme/theme.dart';
 import 'package:trirecall/core/services/database_helper.dart';
+import 'package:trirecall/core/services/schedule_service.dart';
 import 'package:trirecall/core/services/data_maintenance_service.dart';
 import 'package:trirecall/features/dashboard/screens/nav_hub_screen.dart'; 
 
@@ -11,9 +12,10 @@ Future<void> main() async {
   // Initialize the database.
   await DatabaseHelper.instance.database; 
 
-  // Run the decay check in the background. We don't need to `await` it,
-  // as the app can continue to load while this happens.
+  // We run these two services in the background on every app start.
+  // We don't need to `await` them as the UI can load while they work.
   DataMaintenanceService().applyDecay();
+  ScheduleService().generateMissingDateCards();
   
   runApp(const ProviderScope(child: MyApp()));
 }

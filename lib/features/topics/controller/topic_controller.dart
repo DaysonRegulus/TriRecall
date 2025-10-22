@@ -67,8 +67,12 @@ class TopicController extends StateNotifier<bool> {
 
     await DatabaseHelper.instance.createTopic(newTopic);
 
-    // Invalidate the 'allTopicsProvider' so any screen listening to it will update.
+    // Invalidate every provider that depends on the topics table to ensure
+    // all parts of the UI refresh immediately.
     ref.invalidate(allTopicsProvider);
+    ref.invalidate(dueItemsProvider);
+    // We also invalidate the entire family of providers for subject-specific topics.
+    ref.invalidate(topicsForSubjectProvider);
 
     state = false;
   }
@@ -79,7 +83,6 @@ class TopicController extends StateNotifier<bool> {
   }) async {
     // We don't need a loading state for a quick operation like delete.
     await DatabaseHelper.instance.deleteTopic(topicId);
-
     // CRITICAL STEP: After deletion, we must invalidate all providers that
     // show topic data to force them to refresh and update the UI.
     ref.invalidate(allTopicsProvider);
