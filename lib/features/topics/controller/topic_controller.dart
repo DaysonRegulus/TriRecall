@@ -36,42 +36,55 @@ class TopicController extends StateNotifier<bool> {
   }) async {
     state = true;
 
-    // 1. Find the DateCard for the selected 'studiedOn' date.
-    DateCard? parentDateCard = await DatabaseHelper.instance.getDateCardByDate(studiedOn);
+    // Best Practice: Normalize the date ONCE at the very beginning.
+    // This ensures all subsequent logic uses a clean, time-stripped date.
+    final normalizedStudyDate = DateTime(studiedOn.year, studiedOn.month, studiedOn.day);
 
-    // 2. If no DateCard exists (e.g., user picked a Sunday or a date
-    // outside the schedule), create one on the fly. This makes the app more robust.
+    // Now, we search for the parent DateCard using this normalized date.
+    DateCard? parentDateCard = await DatabaseHelper.instance.getDateCardByDate(normalizedStudyDate);
+
+    // This block now works correctly because it creates and fetches using the same normalized date.
     if (parentDateCard == null) {
+      // Create the new DateCard using the CLEAN, NORMALIZED date.
       final newDateCard = DateCard(
-        studyDate: studiedOn,
-        nextDue: DateTime(studiedOn.year, studiedOn.month, studiedOn.day).add(const Duration(days: 1)),
+        studyDate: normalizedStudyDate,
+        nextDue: normalizedStudyDate.add(const Duration(days: 1)),
       );
       await DatabaseHelper.instance.createDateCard(newDateCard);
-      // Now, fetch it again to get its newly assigned ID.
-      parentDateCard = await DatabaseHelper.instance.getDateCardByDate(studiedOn);
+
+      // This fetch will now succeed because the data we saved matches the search key.
+      parentDateCard = await DatabaseHelper.instance.getDateCardByDate(normalizedStudyDate);
+    }
+
+    // This null check is now safe. If parentDateCard is still null here,
+    // it indicates a serious, unrecoverable database issue.
+    if (parentDateCard == null) {
+      // TODO: Implement proper error handling/logging for this edge case.
+      // For now, we prevent a crash by stopping execution.
+      state = false;
+      return;
     }
 
     final now = DateTime.now();
     final newTopic = Topic(
       subjectId: subjectId,
-      dateCardId: parentDateCard!.id, // Safe to use '!' because we just created it if it was null.
+      // The `!` is now safe to use because of the check above.
+      dateCardId: parentDateCard.id,
       title: title,
       notes: notes,
-      studiedOn: studiedOn,
-      // The due date is always calculated from the 'studiedOn' date.
-      nextDue: DateTime(studiedOn.year, studiedOn.month, studiedOn.day)
-          .add(const Duration(days: 1)),
+      // We save the topic with the normalized date for consistency.
+      studiedOn: normalizedStudyDate,
+      // The due date is also calculated from the clean, normalized date.
+      nextDue: normalizedStudyDate.add(const Duration(days: 1)),
       lastReviewedAt: now,
       createdAt: now,
     );
 
     await DatabaseHelper.instance.createTopic(newTopic);
 
-    // Invalidate every provider that depends on the topics table to ensure
-    // all parts of the UI refresh immediately.
+    // Invalidate all relevant providers to ensure the UI updates everywhere.
     ref.invalidate(allTopicsProvider);
     ref.invalidate(dueItemsProvider);
-    // We also invalidate the entire family of providers for subject-specific topics.
     ref.invalidate(topicsForSubjectProvider);
 
     state = false;
